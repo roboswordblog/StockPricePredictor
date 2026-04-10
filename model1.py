@@ -7,10 +7,10 @@ import torch.nn.functional as F
 df = pd.read_csv("AAPL.csv")
 df = df.drop(columns=["Open", "High", "Low"])
 df = df.iloc[2:]
-df.rename(columns={"Price": 'Date'}, inplace=True)
-
+# df.rename(columns={"Price": 'Date'}, inplace=True)
+# df = df.drop(columns=["Date"])
 # convert it into a tensor
-data = torch.tensor(df.values, dtype=torch.float32)
+# data = torch.tensor(df.values, dtype=torch.float32)
 
 # create the model class
 class Model(nn.Module):
@@ -26,5 +26,12 @@ class Model(nn.Module):
         x = self.out(x)
         return x
 
+def getPast5():
+    pass
+
+# Seed
+torch.manual_seed(41)
+
+model = Model()
 
 
