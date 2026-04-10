@@ -6,10 +6,11 @@ import matplotlib.pyplot as plt
 # Data Cleaning
 df = pd.read_csv("AAPL.csv")
 # As you see we are also dropping Volume, because this model is the one where we are just going to be giving it one input feature
-df = df.drop(columns=["Open", "High", "Low", "Price","Volume"])
+df = df.drop(columns=["Open", "High", "Low", "Volume"])
 df = df.iloc[2:]
 
 def custom_func(x):
+    x = str(x)
     return float(x.split("-")[0] + x.split("-")[1] + x.split("-")[2])
 
 df.rename(columns={"Price": 'Date'}, inplace=True)
@@ -21,7 +22,7 @@ df['Date'] = df['Date'].apply(custom_func)
 # create the model class
 class Model(nn.Module):
     def __init__(self, in_features=2, h1=8, h2=9):
-        super().__init__(self)
+        super().__init__()
         self.fc1 = nn.Linear(in_features, h1)
         self.fc2 = nn.Linear(h1, h2)
         self.out = nn.Linear(h2, 1)
@@ -33,16 +34,24 @@ class Model(nn.Module):
         return x
 
 # To get the past 5 close prices
-def getPast5():
-    pass
+def getPast5(date):
+    lists = []
+    if date > 20200108:
+        index = df[df['Date'] == date].index[0]
+
+        for i in range(6, 1, -1):
+            result = df.iloc[index-i]
+            print(result["Close"])
+            lists.append(float(result["Close"]))
+    return lists
 
 # Seed
 torch.manual_seed(41)
 
 model = Model()
 
-X = df["Dates"]
+X = df["Date"]
 y = df["Close"]
 
-
+print(getPast5(20200109))
 # Plans for tomorow, make the getPast5 function, then use that on the model while training.
