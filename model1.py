@@ -2,13 +2,19 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import matplotlib.pyplot as plt
 # Data Cleaning
 df = pd.read_csv("AAPL.csv")
-df = df.drop(columns=["Open", "High", "Low"])
+# As you see we are also dropping Volume, because this model is the one where we are just going to be giving it one input feature
+df = df.drop(columns=["Open", "High", "Low", "Price","Volume"])
 df = df.iloc[2:]
-# df.rename(columns={"Price": 'Date'}, inplace=True)
-# df = df.drop(columns=["Date"])
+
+def custom_func(x):
+    return float(x.split("-")[0] + x.split("-")[1] + x.split("-")[2])
+
+df.rename(columns={"Price": 'Date'}, inplace=True)
+df['Date'] = df['Date'].apply(custom_func)
+
 # convert it into a tensor
 # data = torch.tensor(df.values, dtype=torch.float32)
 
@@ -26,6 +32,7 @@ class Model(nn.Module):
         x = self.out(x)
         return x
 
+# To get the past 5 close prices
 def getPast5():
     pass
 
@@ -34,4 +41,8 @@ torch.manual_seed(41)
 
 model = Model()
 
+X = df["Dates"]
+y = df["Close"]
 
+
+# Plans for tomorow, make the getPast5 function, then use that on the model while training.
