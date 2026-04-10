@@ -1,12 +1,7 @@
-Note: This project is about apple stocks.
+Apple Stock Prediction(A Pytorch experiment)
+This project uses apple stock history to find out the differences in performance when you change the input features.
 
-In this pytorch project, I use one data set, but i feed in two different models different x and y.
+The goal of this project is to find out how adding more input features affects the models performance compared to less input features.
 
-Model 1 has the x of the previous prices and the y of what the price will be.
-Mode 2 will be the previous prices AND the volume and y will be the price right now.
-
-By "price" I mean the close price in a certain day.
-By "volume" I mean the amount of stocks traded/sold that day.
-
-You can run the code to see which one runs better.
-I used the yahoo databases to get the data.
+The data includes:
+  
