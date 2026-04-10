@@ -14,5 +14,9 @@ data = torch.tensor(df.values, dtype=torch.float32)
 
 # create the model class
 class Model(nn.Module):
-    def __init__(self):
-        super(Model, self).__init__()
+    def __init__(self, in_features=2, h1=8, h2=9):
+        super().__init__(self)
+        self.fc1 = nn.Linear(in_features, h1)
+        self.fc2 = nn.Linear(h1, h2)
+        self.out = nn.Linear(h2, 1)
+
