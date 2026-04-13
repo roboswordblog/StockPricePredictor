@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 # Data Cleaning
 df = pd.read_csv("AAPL.csv")
 # As you see we are also dropping Volume, because this model is the one where we are just going to be giving it one input feature
@@ -21,7 +22,7 @@ df['Date'] = df['Date'].apply(custom_func)
 
 # create the model class
 class Model(nn.Module):
-    def __init__(self, in_features=2, h1=8, h2=9):
+    def __init__(self, in_features=1, h1=8, h2=9):
         super().__init__()
         self.fc1 = nn.Linear(in_features, h1)
         self.fc2 = nn.Linear(h1, h2)
@@ -52,6 +53,15 @@ model = Model()
 
 X = df["Date"]
 y = df["Close"]
+X = X.values
+y = y.values
+# print(getPast5(20200109))
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train = torch.FloatTensor(X_train)
+X_test = torch.FloatTensor(X_test)
+y_train = torch.FloatTensor(y_train.astype(float))
+y_test = torch.FloatTensor(y_test.astype(float))
+criterion = nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
-print(getPast5(20200109))
-# Plans for tomorow, make the getPast5 function, then use that on the model while training.
+
