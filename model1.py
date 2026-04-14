@@ -2,66 +2,74 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-# Data Cleaning
+
 df = pd.read_csv("AAPL.csv")
-# As you see we are also dropping Volume, because this model is the one where we are just going to be giving it one input feature
 df = df.drop(columns=["Open", "High", "Low", "Volume"])
-df = df.iloc[2:]
+df = df.iloc[2:].reset_index(drop=True)
 
 def custom_func(x):
     x = str(x)
     return float(x.split("-")[0] + x.split("-")[1] + x.split("-")[2])
 
-df.rename(columns={"Price": 'Date'}, inplace=True)
-df['Date'] = df['Date'].apply(custom_func)
+df.rename(columns={"Price": "Date"}, inplace=True)
+df["Date"] = df["Date"].apply(custom_func)
+df["Close"] = df["Close"].astype(float)
 
-# convert it into a tensor
-# data = torch.tensor(df.values, dtype=torch.float32)
+def getPast5(index):
+    values = []
+    for i in range(5, 0, -1):
+        values.append(float(df.iloc[index - i]["Close"]))
+    return values
 
-# create the model class
+X = []
+y = []
+
+for i in range(5, len(df)):
+    X.append(getPast5(i))
+    y.append(float(df.iloc[i]["Close"]))
+
+X = torch.FloatTensor(X)
+y = torch.FloatTensor(y).reshape(-1, 1)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
+
 class Model(nn.Module):
-    def __init__(self, in_features=1, h1=8, h2=9):
+    def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(in_features, h1)
-        self.fc2 = nn.Linear(h1, h2)
-        self.out = nn.Linear(h2, 1)
+        self.fc1 = nn.Linear(5, 16)
+        self.fc2 = nn.Linear(16, 8)
+        self.fc3 = nn.Linear(8, 4)
+        self.out = nn.Linear(4, 1)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
-        x= F.relu(self.fc2(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
         x = self.out(x)
         return x
 
-# To get the past 5 close prices
-def getPast5(date):
-    lists = []
-    if date > 20200108:
-        index = df[df['Date'] == date].index[0]
-
-        for i in range(6, 1, -1):
-            result = df.iloc[index-i]
-            print(result["Close"])
-            lists.append(float(result["Close"]))
-    return lists
-
-# Seed
 torch.manual_seed(41)
-
 model = Model()
 
-X = df["Date"]
-y = df["Close"]
-X = X.values
-y = y.values
-# print(getPast5(20200109))
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-X_train = torch.FloatTensor(X_train)
-X_test = torch.FloatTensor(X_test)
-y_train = torch.FloatTensor(y_train.astype(float))
-y_test = torch.FloatTensor(y_test.astype(float))
 criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
+epochs = 100
 
+for i in range(epochs):
+    y_pred = model(X_train)
+    loss = criterion(y_pred, y_train)
+
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+    if i % 10 == 0:
+        print(f"Epoch {i}, Loss: {loss.item()}")
+
+with torch.no_grad():
+    test_pred = model(X_test)
+    test_loss = criterion(test_pred, y_test)
+
+print(f"Test Loss: {test_loss.item()}")
