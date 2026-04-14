@@ -16,4 +16,6 @@ The Models:
      b. The y is the price of the closing price of today.
 
 Experiment Type
-This experiment type is a comparing one, where you compare too models. Stay tuned to find out the result!
+This experiment type is a comparing one, where you compare too models. 
+
+The results of the experiment were terrible. But the end result was that adding more features decreased the amount of loss by almost over 2x. You should also try it out and record your results. Star and follow for more projects like this.
